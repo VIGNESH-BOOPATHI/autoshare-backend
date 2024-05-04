@@ -4,23 +4,25 @@ const authenticateToken = require('../middleware/auth'); // JWT-based authentica
 const checkRole = require('../middleware/role'); // Role-based access control
 const checkOwnership = require('../middleware/ownership'); // Ownership check middleware
 const multer = require('multer');
-const multerS3 = require('multer-s3');
-const AWS = require('aws-sdk');
+const multerS3 = require('multer-s3'); // Correct import for Multer with S3
+const { S3Client } = require('@aws-sdk/client-s3'); // AWS SDK v3
 
 const router = express.Router(); // Create a new router instance
 
-// Set up AWS S3 client
-const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+// Set up AWS S3 client with AWS SDK v3
+const s3Client = new S3Client({
   region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
 });
 
 // Multer setup for S3 file uploads
 const upload = multer({
   storage: multerS3({
-    s3,
-    bucket: process.env.AWS_S3_BUCKET,
+    s3: s3Client, // Use the new S3 client
+    bucket: process.env.AWS_S3_BUCKET, // Ensure this is defined in .env
     acl: 'public-read', // Allow public read access
     key: (req, file, cb) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -29,19 +31,12 @@ const upload = multer({
   }),
 });
 
-// Add a new vehicle (restricted to hosts)
-router.post('/', authenticateToken, checkRole('host'), upload.single('vehicleImage'), vehiclesController.addVehicle);
 
-// Update a vehicle (restricted to hosts and ownership check)
-router.put('/:id', authenticateToken, checkRole('host'), checkOwnership, upload.single('vehicleImage'), vehiclesController.updateVehicle);
-
-// Delete a vehicle (restricted to hosts and ownership check)
-router.delete('/:id', authenticateToken, checkRole('host'), checkOwnership, vehiclesController.deleteVehicle);
-
-// Book a vehicle (restricted to users)
-router.post('/book/:id', authenticateToken, checkRole('user'), vehiclesController.bookVehicle);
-
-// Cancel a booking (restricted to users)
-router.delete('/cancel/:id', authenticateToken, checkRole('user'), vehiclesController.cancelBooking);
+// Define the routes for vehicle operations
+router.post('/', authenticateToken, checkRole('host'), upload.single('vehicleImage'), vehiclesController.addVehicle); // Add a new vehicle
+router.put('/:id', authenticateToken, checkRole('host'), checkOwnership, upload.single('vehicleImage'), vehiclesController.updateVehicle); // Update a vehicle
+router.delete('/:id', authenticateToken, checkRole('host'), checkOwnership, vehiclesController.deleteVehicle); // Delete a vehicle
+router.post('/book/:id', authenticateToken, checkRole('user'), vehiclesController.bookVehicle); // Book a vehicle
+router.delete('/cancel/:id', authenticateToken, checkRole('user'), vehiclesController.cancelBooking); // Cancel a booking
 
 module.exports = router; // Export the router

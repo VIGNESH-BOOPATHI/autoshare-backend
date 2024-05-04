@@ -1,12 +1,29 @@
+const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3'); // AWS SDK v3
 const Vehicle = require('../models/Vehicle'); // Vehicle model
-const AWS = require('aws-sdk'); // AWS S3 for file storage
 
-// Set up AWS S3 client
-const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+// Set up AWS S3 client with AWS SDK v3
+const s3Client = new S3Client({
   region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
 });
+
+// Helper function to delete an object from S3
+const deleteS3Object = async (bucket, key) => {
+  const command = new DeleteObjectCommand({
+    Bucket: bucket,
+    Key: key,
+  });
+
+  try {
+    const response = await s3Client.send(command); // AWS SDK v3 approach
+    console.log('Deleted object from S3:', response);
+  } catch (error) {
+    console.error('Error deleting object from S3:', error);
+  }
+};
 
 const vehiclesController = {
   // Add a new vehicle (restricted to hosts)
@@ -36,20 +53,11 @@ const vehiclesController = {
     const { name, category, pricePerDay, available } = req.body;
 
     try {
-      const vehicle = req.vehicle; // The vehicle from the ownership check middleware
+      const vehicle = req.vehicle; // The vehicle from the ownership check
 
       if (req.file) {
         const key = vehicle.imageUrl.split('/').pop(); // Extract the S3 key
-        s3.deleteObject({
-          Bucket: process.env.AWS_S3_BUCKET,
-          Key: key,
-        }, (err, data) => {
-          if (err) {
-            console.error('Error deleting old image from S3:', err);
-          } else {
-            console.log('Old image deleted from S3:', data);
-          }
-        });
+        await deleteS3Object(process.env.AWS_S3_BUCKET, key); // Delete the old image from S3
 
         vehicle.imageUrl = req.file.location; // Update with the new image URL
       }
@@ -73,16 +81,7 @@ const vehiclesController = {
 
     if (vehicle.imageUrl) {
       const key = vehicle.imageUrl.split('/').pop(); // Extract the S3 key
-      s3.deleteObject({
-        Bucket: process.env.AWS_S3_BUCKET,
-        Key: key,
-      }, (err, data) => {
-        if (err) {
-          console.error('Error deleting object from S3:', err); // Handle S3 deletion errors
-        } else {
-          console.log('Deleted object from S3:', data); // Log success
-        }
-      });
+      await deleteS3Object(process.env.AWS_S3_BUCKET, key); // Delete from S3
     }
 
     await Vehicle.findByIdAndDelete(vehicle._id); // Delete the vehicle from MongoDB
@@ -101,8 +100,6 @@ const vehiclesController = {
         return res.status(404).json({ error: 'Vehicle not available' }); // Handle unavailable vehicle
       }
 
-      // Implement booking logic here (e.g., create a booking record)
-      // For simplicity, this example returns a success message
       res.status(200).json({ message: 'Vehicle booked successfully' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to book vehicle' }); // Handle errors
@@ -115,7 +112,6 @@ const vehiclesController = {
 
     try {
       // Implement booking cancellation logic here
-      // This example simply returns a success message
       res.status(200).json({ message: 'Booking cancelled successfully' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to cancel booking' }); // Handle errors

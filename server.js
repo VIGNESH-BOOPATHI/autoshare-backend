@@ -11,9 +11,10 @@ app.use(express.json()); // Parse JSON bodies
 app.use(morgan('dev')); // Log HTTP requests
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('Connected to MongoDB')) // Connection successful
-  .catch((err) => console.error('MongoDB connection error:', err)); // Handle errors
+mongoose
+  .connect(process.env.MONGODB_URI) // No need for deprecated options
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
 // Import route files
 const authRoutes = require('./routes/authRoutes'); // Authentication routes
