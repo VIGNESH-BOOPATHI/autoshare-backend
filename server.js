@@ -9,7 +9,7 @@ const cron = require('node-cron');
 const Vehicle = require('./models/Vehicle');
 const Booking = require('./models/Booking');
 const bookingsRoutes = require('./routes/bookingsRoutes'); // Import the new bookings routes
-
+const reviewRoutes = require('./routes/reviewsRoutes'); // Import review routes
 
 
 dotenv.config(); // Load environment variables
@@ -99,6 +99,7 @@ const vehiclesRoutes = require('./routes/vehiclesRoutes'); // Vehicle CRUD opera
 app.use('/auth', authRoutes); // Authentication and OTP-based login routes
 app.use('/vehicles', vehiclesRoutes); // Vehicle CRUD 
 app.use('/bookings', bookingsRoutes); // Apply the bookings routes
+app.use('/reviews', reviewRoutes); // New route for reviews
 
 // Default route for the server
 app.get('/', (req, res) => {
