@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, unique: true, required: true },
   role: {
     type: String,
-    enum: ['user', 'host'], // Role-based access control
+    enum: ['user', 'host', 'admin'], // Role-based access control
     default: 'user',
   },
 });

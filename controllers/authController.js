@@ -101,9 +101,11 @@ const authController = {
       await OTP.deleteOne({ userId: user._id });
 
       // Generate JWT for successful verification
-      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-        expiresIn: '24h', // Token valid for 24 hours
-      });
+      const token = jwt.sign(
+        { userId: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' } // Token valid for 24 hours
+      );
 
       res.status(200).json({ token }); // Return JWT on successful OTP verification
     } catch (error) {
@@ -111,6 +113,35 @@ const authController = {
       res.status(500).json({ error: 'Failed to verify OTP' });
     }
   },
+
+  toggleRole: async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+      // Find the user by email
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Check if the password matches
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      if (!isPasswordCorrect) {
+        return res.status(401).json({ error: 'Incorrect password' }); // If password is incorrect
+      }
+
+      // Toggle the user role
+      user.role = user.role === 'user' ? 'host' : 'user'; // Toggle between 'user' and 'host'
+
+      await user.save(); // Save the updated user
+
+      res.status(200).json({ message: `Role changed to ${user.role}` }); // Return success message
+    } catch (error) {
+      console.error('Error toggling role:', error);
+      res.status(500).json({ error: 'Failed to toggle role' }); // Handle errors
+    }
+  }
 };
 
 module.exports = authController; // Export the controller

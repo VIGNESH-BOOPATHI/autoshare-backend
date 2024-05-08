@@ -10,6 +10,8 @@ const checkRole = (requiredRole) => {
       next(); // Continue to the next middleware or route handler
     };
   };
+
+  
   
   module.exports = checkRole; // Export the role-checking middleware
 

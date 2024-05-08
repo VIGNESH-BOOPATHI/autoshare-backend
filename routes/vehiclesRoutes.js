@@ -18,12 +18,12 @@ const s3Client = new S3Client({
   },
 });
 
-// Multer setup for S3 file uploads
+// Multer setup for S3 file uploads without ACLs
 const upload = multer({
   storage: multerS3({
     s3: s3Client, // Use the new S3 client
     bucket: process.env.AWS_S3_BUCKET, // Ensure this is defined in .env
-    acl: 'public-read', // Allow public read access
+    // Remove acl to avoid AccessControlListNotSupported error
     key: (req, file, cb) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
       cb(null, `${file.fieldname}-${uniqueSuffix}`); // Generate unique file names
@@ -31,12 +31,16 @@ const upload = multer({
   }),
 });
 
-
 // Define the routes for vehicle operations
 router.post('/', authenticateToken, checkRole('host'), upload.single('vehicleImage'), vehiclesController.addVehicle); // Add a new vehicle
 router.put('/:id', authenticateToken, checkRole('host'), checkOwnership, upload.single('vehicleImage'), vehiclesController.updateVehicle); // Update a vehicle
 router.delete('/:id', authenticateToken, checkRole('host'), checkOwnership, vehiclesController.deleteVehicle); // Delete a vehicle
-router.post('/book/:id', authenticateToken, checkRole('user'), vehiclesController.bookVehicle); // Book a vehicle
-router.delete('/cancel/:id', authenticateToken, checkRole('user'), vehiclesController.cancelBooking); // Cancel a booking
+
+
+// Route to list all vehicles
+router.get('/', vehiclesController.listAllVehicles); // Require authentication to list vehicles
+
+// Route to get a vehicle by its ID
+router.get('/:id', vehiclesController.getVehicleById); // Get a single vehicle by ID
 
 module.exports = router; // Export the router

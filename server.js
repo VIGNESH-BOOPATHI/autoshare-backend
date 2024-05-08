@@ -4,9 +4,13 @@ const morgan = require('morgan');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const helmet = require('helmet'); // For security-related HTTP headers
-const moment = require('moment-timezone'); // For time zone handling
+const rateLimit = require('express-rate-limit');
 const cron = require('node-cron');
-const OTP = require('../models/OTP'); // Import the OTP model
+const Vehicle = require('./models/Vehicle');
+const Booking = require('./models/Booking');
+const bookingsRoutes = require('./routes/bookingsRoutes'); // Import the new bookings routes
+
+
 
 dotenv.config(); // Load environment variables
 const app = express(); // Express.js instance
@@ -20,7 +24,15 @@ const setTimeZoneMiddleware = (req, res, next) => {
 // Apply the middleware globally (before any routes)
 app.use(setTimeZoneMiddleware); // Ensures time zone is set for every request
 
+// Set up rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+});
 
+// Apply rate limiting to the vehicles route
+app.use('/vehicles', limiter); // This applies the rate limit to all vehicle endpoints
 
 // Other middleware
 app.use(cors()); // Allow cross-origin requests
@@ -45,7 +57,34 @@ mongoose
     }
   });
 
+  // Run a job every hour to check for bookings that should be completed
+cron.schedule('*/15 * * * *', async () => {
+  const now = new Date();
+
+  try {
+    const bookings = await Booking.find({ endTime: { $lt: now }, completed: false });
+
+    for (const booking of bookings) {
+      // Mark the booking as completed
+      booking.completed = true;
+      await booking.save();
+
+      // Set the vehicle as available again
+      const vehicle = await Vehicle.findById(booking.vehicleId);
+      if (vehicle) {
+        vehicle.available = true;
+        await vehicle.save();
+      }
+    }
+
+    console.log(`Completed ${bookings.length} bookings`);
+  } catch (error) {
+    console.error('Error completing bookings:', error);
+  }
+});
+
   console.log('OTP cleanup job scheduled.');
+  console.log('Booking completion job scheduled.');
 })
 .catch((err) => {
   console.error('MongoDB connection error:', err);
@@ -58,7 +97,8 @@ const vehiclesRoutes = require('./routes/vehiclesRoutes'); // Vehicle CRUD opera
 
 // Apply routes
 app.use('/auth', authRoutes); // Authentication and OTP-based login routes
-app.use('/vehicles', vehiclesRoutes); // Vehicle CRUD operations
+app.use('/vehicles', vehiclesRoutes); // Vehicle CRUD 
+app.use('/bookings', bookingsRoutes); // Apply the bookings routes
 
 // Default route for the server
 app.get('/', (req, res) => {

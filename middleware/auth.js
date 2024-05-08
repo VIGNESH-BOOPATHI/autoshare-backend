@@ -1,21 +1,20 @@
 const jwt = require('jsonwebtoken');
 
-// Middleware for JWT-based authentication
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Extract the token
+  const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    return res.status(401).json({ error: 'Unauthorized' }); // Reject if no token
+    return res.status(401).json({ error: 'Unauthorized: Token not found' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
-      return res.status(403).json({ error: 'Invalid token' }); // Handle invalid token
+      return res.status(403).json({ error: 'Unauthorized: Invalid token' });
     }
 
-    req.user = user; // Attach user information to the request object
-    next(); // Continue to the next middleware or route handler
+    req.user = decoded; // Set decoded token information
+    next(); // Proceed to the next middleware
   });
 };
 
