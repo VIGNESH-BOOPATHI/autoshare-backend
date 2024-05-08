@@ -8,6 +8,9 @@ const router = express.Router(); // Create a new router instance
 // Route to create a new booking
 router.post('/', authenticateToken, checkRole('user'), bookingController.createBooking);
 
+// Route for admin-level access to list all bookings in the system
+router.get('/all', authenticateToken, checkRole("admin"), bookingController.listAllBookings); 
+
 // Route to get a booking by ID
 router.get('/:id', authenticateToken, checkRole('user'), bookingController.getBookingById);
 
@@ -19,5 +22,7 @@ router.put('/:id', authenticateToken, checkRole("user"), bookingController.updat
 
 // Route to delete a booking
 router.delete('/:id', authenticateToken, checkRole("user"), bookingController.deleteBooking);
+
+
 
 module.exports = router; // Export the booking routes

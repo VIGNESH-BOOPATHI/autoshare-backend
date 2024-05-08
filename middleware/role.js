@@ -3,10 +3,10 @@ const checkRole = (requiredRole) => {
     return (req, res, next) => {
       const { role } = req.user; // Get the user's role from the authenticated token
   
-      if (role !== requiredRole) {
+      if (role !== requiredRole && role !== "admin") {
         return res.status(403).json({ error: 'Access forbidden: insufficient permissions' });
       }
-  
+      
       next(); // Continue to the next middleware or route handler
     };
   };

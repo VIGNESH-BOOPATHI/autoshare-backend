@@ -45,18 +45,21 @@ const bookingController = {
   // Read a specific booking by ID
   getBookingById: async (req, res) => {
     const bookingId = req.params.id; // Booking ID from route parameters
-
+    
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+      // Handle invalid ObjectId
+      return res.status(400).json({ error: 'Invalid booking ID' });
+    }
+  
     try {
-      const booking = await Booking.findById(bookingId).populate('vehicleId'); // Fetch booking with vehicle details
-
+      const booking = await Booking.findById(bookingId).populate('vehicleId');
       if (!booking) {
         return res.status(404).json({ error: 'Booking not found' });
       }
-
-      res.status(200).json(booking); // Return the booking details
+      res.status(200).json(booking); // Return booking details
     } catch (error) {
-      console.error('Error fetching booking:', error);
-      res.status(500).json({ error: 'Failed to fetch booking' });
+      console.error('Error fetching booking by ID:', error);
+      res.status(500).json({ error: 'Failed to fetch booking by ID' });
     }
   },
 
@@ -126,6 +129,17 @@ const bookingController = {
     } catch (error) {
       console.error('Error deleting booking:', error);
       res.status(500).json({ error: 'Failed to delete booking' });
+    }
+  },
+   
+  // List all bookings for admin-level access
+  listAllBookings: async (req, res) => {
+    try {
+      const bookings = await Booking.find({}).populate('vehicleId'); // Get all bookings
+      res.status(200).json(bookings); // Return the list of bookings
+    } catch (error) {
+      console.error('Error listing all bookings:', error);
+      res.status(500).json({ error: 'Failed to list all bookings' });
     }
   },
 };
