@@ -136,7 +136,14 @@ const authController = {
 
       await user.save(); // Save the updated user
 
-      res.status(200).json({ message: `Role changed to ${user.role}` }); // Return success message
+      const token = jwt.sign(
+        { userId: user._id, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' } // Token valid for 24 hours
+      );
+
+      res.status(200).json({ message: `Role changed to ${user.role}`, token }); // Return success message
+
     } catch (error) {
       console.error('Error toggling role:', error);
       res.status(500).json({ error: 'Failed to toggle role' }); // Handle errors
