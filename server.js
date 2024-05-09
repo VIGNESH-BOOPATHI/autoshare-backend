@@ -10,6 +10,7 @@ const Vehicle = require('./models/Vehicle');
 const Booking = require('./models/Booking');
 const bookingsRoutes = require('./routes/bookingsRoutes'); // Import the new bookings routes
 const reviewRoutes = require('./routes/reviewsRoutes'); // Import review routes
+const paymentRoutes = require('./routes/paymentRoutes');
 
 
 dotenv.config(); // Load environment variables
@@ -100,6 +101,7 @@ app.use('/auth', authRoutes); // Authentication and OTP-based login routes
 app.use('/vehicles', vehiclesRoutes); // Vehicle CRUD 
 app.use('/bookings', bookingsRoutes); // Apply the bookings routes
 app.use('/reviews', reviewRoutes); // New route for reviews
+app.use('/payments', paymentRoutes); // Apply the payment routeq
 
 // Default route for the server
 app.get('/', (req, res) => {
