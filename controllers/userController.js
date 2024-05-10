@@ -33,6 +33,62 @@ const userController = {
       res.status(500).json({ error: 'Failed to fetch user by ID' });
     }
   },
+  
+  // Update user details (authenticated users can update their own info)
+  updateUser: async (req, res) => {
+    const userId = req.params.id; // User ID from the route parameters
+    const user = req.user; // Authenticated user from the JWT token
+
+    if (user.userId !== userId) {
+      return res.status(403).json({ error: 'Unauthorized: Cannot update other users' }); // Restrict to updating own info
+    }
+
+    const updates = {}; // Store the provided updates
+    const { name, location, phone } = req.body;
+
+    if (name) updates.name = name;
+    if (location) updates.location = location;
+    if (phone) updates.phone = phone;
+
+    try {
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $set: updates }, // Apply the updates
+        { new: true, select: '-password' } // Return the updated user without the password field
+      );
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.status(200).json({ message: 'User updated successfully', user: updatedUser });
+    } catch (error) {
+      console.error('Error updating user:', error);
+      res.status(500).json({ error: 'Failed to update user' }); // Handle server errors
+    }
+  },
+
+  // Admin-only: Delete user by ID
+  deleteUser: async (req, res) => {
+    const userId = req.params.id; // User ID from route parameters
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: 'Invalid user ID' }); // Validate ObjectId
+    }
+
+    try {
+      const deletedUser = await User.findByIdAndDelete(userId); // Delete the user by ID
+
+      if (!deletedUser) {
+        return res.status(404).json({ error: 'User not found' }); // Handle non-existent user
+      }
+
+      res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      res.status(500).json({ error: 'Failed to delete user' }); // Handle server errors
+    }
+  },
 };
 
 module.exports = userController; // Export the user controller
