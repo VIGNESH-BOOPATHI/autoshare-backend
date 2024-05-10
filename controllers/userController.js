@@ -41,7 +41,7 @@ const userController = {
    
 
     if (user.userId !== userId) {
-      return res.status(403).json({ error: 'Unauthorized: Cannot update other users' }); // Restrict to updating own info
+      return res.status(403).json({ error: `Unauthorized: Cannot update other users ${user.userId} and ${userId}` }); // Restrict to updating own info
     }
 
     const updates = {}; // Store the provided updates
