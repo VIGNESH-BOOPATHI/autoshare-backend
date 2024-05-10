@@ -37,10 +37,10 @@ const userController = {
   // Update user details (authenticated users can update their own info)
   updateUser: async (req, res) => {
     const userId = req.params.id; // User ID from the route parameters
-    const user = req.id; // Authenticated user from the JWT token
+    const user = req.user; // Authenticated user from the JWT token
    
 
-    if (user !== userId) {
+    if (user.userId !== userId) {
       return res.status(403).json({ error: 'Unauthorized: Cannot update other users' }); // Restrict to updating own info
     }
 
