@@ -33,13 +33,14 @@ const userController = {
       res.status(500).json({ error: 'Failed to fetch user by ID' });
     }
   },
-  
+
   // Update user details (authenticated users can update their own info)
   updateUser: async (req, res) => {
     const userId = req.params.id; // User ID from the route parameters
-    const user = req.user; // Authenticated user from the JWT token
+    const user = req.id; // Authenticated user from the JWT token
+   
 
-    if (user.userId !== userId) {
+    if (user !== userId) {
       return res.status(403).json({ error: 'Unauthorized: Cannot update other users' }); // Restrict to updating own info
     }
 
