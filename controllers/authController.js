@@ -102,7 +102,7 @@ const authController = {
 
       // Generate JWT for successful verification
       const token = jwt.sign(
-        { userId: user._id, role: user.role },
+        { userId: user._id, role: user.role, name: user.name},
         process.env.JWT_SECRET,
         { expiresIn: '24h' } // Token valid for 24 hours
       );
@@ -137,7 +137,7 @@ const authController = {
       await user.save(); // Save the updated user
 
       const token = jwt.sign(
-        { userId: user._id, role: user.role },
+        { userId: user._id, role: user.role, name: user.name},
         process.env.JWT_SECRET,
         { expiresIn: '24h' } // Token valid for 24 hours
       );
