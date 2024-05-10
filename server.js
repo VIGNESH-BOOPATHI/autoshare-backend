@@ -12,6 +12,7 @@ const bookingsRoutes = require('./routes/bookingsRoutes'); // Import the new boo
 const reviewRoutes = require('./routes/reviewsRoutes'); // Import review routes
 const paymentRoutes = require('./routes/paymentRoutes');
 const contactRoutes = require('./routes/contactRoutes'); // Import the new contact route
+const userRoutes = require('./routes/userRoutes'); // Import the new user routes
 
 
 dotenv.config(); // Load environment variables
@@ -104,6 +105,7 @@ app.use('/bookings', bookingsRoutes); // Apply the bookings routes
 app.use('/reviews', reviewRoutes); // New route for reviews
 app.use('/payments', paymentRoutes); // Apply the payment route
 app.use('/api', contactRoutes); // Prefix with "/api" for clarity
+app.use('/users', userRoutes); // Prefix with "/users" to access user data
 
 // Default route for the server
 app.get('/', (req, res) => {
