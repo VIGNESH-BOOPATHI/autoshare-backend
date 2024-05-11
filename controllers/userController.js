@@ -1,5 +1,6 @@
 const User = require('../models/User'); // Import the User model
 const mongoose = require('mongoose'); // Mongoose for MongoDB operations
+const jwt = require('jsonwebtoken'); // JWT for token generation
 
 const userController = {
   // Get all users (admin-only)
@@ -62,7 +63,14 @@ const userController = {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      res.status(200).json({ message: 'User updated successfully', user: updatedUser });
+        // Generate JWT for successful verification
+        const token = jwt.sign(
+          { userId: user._id, role: user.role, name: user.name},
+          process.env.JWT_SECRET,
+          { expiresIn: '24h' } // Token valid for 24 hours
+        );
+
+      res.status(200).json({ message: 'User updated successfully', user: updatedUser, token });
     } catch (error) {
       console.error('Error updating user:', error);
       res.status(500).json({ error: 'Failed to update user' }); // Handle server errors
