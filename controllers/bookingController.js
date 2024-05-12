@@ -20,6 +20,11 @@ const bookingController = {
         return res.status(403).json({ error: 'Vehicle is not available for booking' });
       }
 
+      // Check if the user is the owner of the vehicle
+      if (vehicle.addedBy.toString() !== userId) {
+        return res.status(403).json({ error: 'Owner of the vehicle cannot book it' });
+      }
+
       // Create a new booking
       const newBooking = new Booking({
         vehicleId,
@@ -40,7 +45,7 @@ const bookingController = {
       console.error('Error creating booking:', error);
       res.status(500).json({ error: 'Failed to create booking' });
     }
-  },
+},
 
   // Read a specific booking by ID
   getBookingById: async (req, res) => {
@@ -81,6 +86,7 @@ const bookingController = {
   updateBooking: async (req, res) => {
     const bookingId = req.params.id; // Booking ID from route parameters
     const { duration } = req.body; // New duration from request body
+    const userId = req.user.userId; // Authenticated user ID from JWT
 
     try {
       const booking = await Booking.findById(bookingId); // Fetch the booking by ID
@@ -88,6 +94,11 @@ const bookingController = {
       if (!booking) {
         return res.status(404).json({ error: 'Booking not found' });
       }
+
+      // Check if the authenticated user is the same as the user who made the booking
+      if (booking.userId.toString() !== userId) {
+        return res.status(403).json({ error: 'Only the user who made the booking can update it' });
+    }
 
       // Update the duration and end time
       booking.duration = duration;

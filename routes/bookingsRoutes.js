@@ -6,22 +6,22 @@ const checkRole = require('../middleware/role'); // Role-based access control
 const router = express.Router(); // Create a new router instance
 
 // Route to create a new booking
-router.post('/', authenticateToken, checkRole('user'), bookingController.createBooking);
+router.post('/', authenticateToken, bookingController.createBooking);
 
 // Route for admin-level access to list all bookings in the system
 router.get('/all', authenticateToken, checkRole("admin"), bookingController.listAllBookings); 
 
 // Route to get a booking by ID
-router.get('/:id', authenticateToken, checkRole('user'), bookingController.getBookingById);
+router.get('/:id', authenticateToken, bookingController.getBookingById);
 
 // Route to list all bookings for a specific user
-router.get('/', authenticateToken, checkRole("user"), bookingController.listBookings);
+router.get('/', authenticateToken, bookingController.listBookings);
 
 // Route to update a booking
-router.put('/:id', authenticateToken, checkRole("user"), bookingController.updateBooking);
+router.put('/:id', authenticateToken, bookingController.updateBooking);
 
 // Route to delete a booking
-router.delete('/:id', authenticateToken, checkRole("user"), bookingController.deleteBooking);
+router.delete('/:id', authenticateToken, bookingController.deleteBooking);
 
 
 
