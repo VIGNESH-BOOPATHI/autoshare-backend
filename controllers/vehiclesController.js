@@ -85,6 +85,11 @@ updateVehicle: async (req, res) => {
       vehicle.available = available === 'true'; // Convert string to boolean
     }
 
+     // Check if the authenticated user is the same as the user who made the booking
+     if (!vehicle.addedBy.equals(req.user.userId)) {
+      return res.status(403).json({ error: 'Only the user who added the vehicle can update it' });
+    }
+
     await vehicle.save(); // Save the updated vehicle to the database
 
     res.status(200).json(vehicle); // Return the updated vehicle
