@@ -1,5 +1,6 @@
 const Vehicle = require('../models/Vehicle'); // Import the Vehicle model
 const jwt = require('jsonwebtoken'); // Import JWT to decode token
+require("dotenv").config();
 
 // Middleware to check vehicle ownership
 const checkOwnership = async (req, res, next) => {

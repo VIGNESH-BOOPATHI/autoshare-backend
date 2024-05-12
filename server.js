@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const cors = require('cors');
-const dotenv = require('dotenv');
+require('dotenv').config(); // Load environment variables
 const helmet = require('helmet'); // For security-related HTTP headers
 const rateLimit = require('express-rate-limit');
 const cron = require('node-cron');
@@ -13,10 +13,10 @@ const reviewRoutes = require('./routes/reviewsRoutes'); // Import review routes
 const paymentRoutes = require('./routes/paymentRoutes');
 const contactRoutes = require('./routes/contactRoutes'); // Import the new contact route
 const userRoutes = require('./routes/userRoutes'); // Import the new user routes
-
-
-dotenv.config(); // Load environment variables
+ 
 const app = express(); // Express.js instance
+
+
 
 // Middleware to set the time zone for each request (optional)
 const setTimeZoneMiddleware = (req, res, next) => {

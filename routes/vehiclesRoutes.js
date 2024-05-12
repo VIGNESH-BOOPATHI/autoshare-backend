@@ -6,6 +6,7 @@ const checkOwnership = require('../middleware/ownership'); // Ownership check mi
 const multer = require('multer');
 const multerS3 = require('multer-s3'); // Correct import for Multer with S3
 const { S3Client } = require('@aws-sdk/client-s3'); // AWS SDK v3
+require("dotenv").config();
 
 const router = express.Router(); // Create a new router instance
 

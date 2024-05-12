@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs'); // Password hashing
 const jwt = require('jsonwebtoken'); // JWT for token generation
 const { generateOTP, sendOTP } = require('../utils/otp'); // OTP generation and email utilities
 const moment = require('moment-timezone'); // Time zone handling library
+require("dotenv").config();
 
 const authController = {
   // User registration

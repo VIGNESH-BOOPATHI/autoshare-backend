@@ -1,6 +1,7 @@
 const User = require('../models/User'); // Import the User model
 const mongoose = require('mongoose'); // Mongoose for MongoDB operations
 const jwt = require('jsonwebtoken'); // JWT for token generation
+require("dotenv").config();
 
 const userController = {
   // Get all users (admin-only)

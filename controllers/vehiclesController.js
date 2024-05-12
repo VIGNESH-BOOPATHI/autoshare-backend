@@ -3,6 +3,7 @@ const Vehicle = require('../models/Vehicle'); // Vehicle
 const Booking = require('../models/Booking'); // Import the Booking model
 const jwt = require('jsonwebtoken'); // JWT for authentication
 const { checkRole } = require('../middleware/role'); // Role-based access control
+require("dotenv").config();
 
 // Set up AWS S3 client with AWS SDK v3
 const s3Client = new S3Client({
