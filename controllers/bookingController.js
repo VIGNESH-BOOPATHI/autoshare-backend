@@ -124,7 +124,7 @@ const bookingController = {
         return res.status(404).json({ error: 'Booking not found' });
       }
 
-      if (booking.userId.toString() !== userId) {
+      if (booking.userId.toString() == userId) {
         return res.status(403).json({ error: 'Unauthorized: Cannot delete another user\'s booking' });
       }
 
