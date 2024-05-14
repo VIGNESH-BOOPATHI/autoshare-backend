@@ -6,13 +6,13 @@ const checkRole = require('../middleware/role');
 const router = express.Router();
 
 // Route to create a new review
-router.post('/', authenticateToken, checkRole('user'), reviewController.createReview);
+router.post('/', authenticateToken, reviewController.createReview);
 
 // Route to get all reviews for a specific vehicle
 router.get('/:vehicleId', reviewController.getReviewsForVehicle);
 
 // Route to update a review
-router.put('/:id', authenticateToken, checkRole('user'), reviewController.updateReview);
+router.put('/:id', authenticateToken, reviewController.updateReview);
 
 // Route to delete a review
 router.delete('/:id', authenticateToken, reviewController.deleteReview);
