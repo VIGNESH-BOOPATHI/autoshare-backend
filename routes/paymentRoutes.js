@@ -20,7 +20,7 @@ router.post('/create-order', authenticateToken, async (req, res) => {
 
   try {
     const order = await razorpay.orders.create({
-      amount: parseFloat(amount), // Convert to smallest currency unit (e.g., paise for INR)
+      amount: amount, // Convert to smallest currency unit (e.g., paise for INR)
       currency: currency || 'INR', // Default to INR if not provided
       receipt, // Optional receipt reference
       notes, // Optional notes (object)
